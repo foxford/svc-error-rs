@@ -11,11 +11,11 @@ jobs:
       script: cargo test
     - stage: check
       name : Rustfmt
-      install: rustup component add rustfmt-preview
+      install: rustup component add rustfmt
       script: cargo fmt -- --check
     - stage: check
       name: Clippy
-      install: rustup component add clippy-preview
+      install: rustup component add clippy
       script: cargo clippy
     - stage: build
       name: Package
@@ -23,6 +23,21 @@ jobs:
     - stage: build
       name: Build w/o features
       script: cargo build
+    - stage: build
+      name: Build w/ diesel
+      script: cargo build --features "diesel"
+    - stage: build
+      name: Build w/ r2d2
+      script: cargo build --features "r2d2"
+    - stage: build
+      name: Build w/ svc-agent
+      script: cargo build --features "svc-agent"
+    - stage: build
+      name: Build w/ svc-authn
+      script: cargo build --features "svc-authn"
+    - stage: build
+      name: Build w/ svc-authz
+      script: cargo build --features "svc-authz"
 stages:
   - name: check
   - name: build

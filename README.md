@@ -2,7 +2,7 @@
 
 [![Build Status][travis-img]][travis]
 
-Implementation of [RFC7807][rfc7807]: Problem Details for HTTP APIs.
+An implementation of [RFC7807][rfc7807]: Problem Details for HTTP APIs.
 
 
 
