@@ -19,6 +19,7 @@ r2d2 = { version = ">=0.8", optional = true }
 svc-agent = { version = ">=0.5", optional = true }
 svc-authn = { version = ">=0.4", optional = true }
 svc-authz = { version = ">=0.4", optional = true }
+sentry = { version = ">=0.16", optional = true }
 
 [features]
 default = []
