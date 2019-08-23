@@ -112,6 +112,11 @@ impl Error {
         self.status
     }
 
+    /// Return a detail for this error.
+    pub fn detail(&self) -> Option<&str> {
+        self.detail.as_ref().map(|s| s.as_str())
+    }
+
     /// Set detailed information about the error.
     pub fn set_detail(&mut self, value: &str) -> &mut Self {
         self.detail = Some(value.to_owned());

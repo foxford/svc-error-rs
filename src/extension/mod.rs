@@ -12,3 +12,6 @@ mod svc_authn;
 
 #[cfg(feature = "svc-authz")]
 mod svc_authz;
+
+#[cfg(feature = "sentry")]
+mod sentry;
