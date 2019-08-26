@@ -4,8 +4,8 @@ use sentry::protocol::{value::Value, Event, Level};
 
 use crate::Error;
 
-impl Into<Event<'_>> for Error {
-    fn into(self) -> Event<'_> {
+impl Into<Event<'static>> for Error {
+    fn into(self) -> Event<'static> {
         let mut extra = BTreeMap::new();
 
         extra.insert(String::from("type"), Value::from(self.kind()));
