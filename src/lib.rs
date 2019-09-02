@@ -5,7 +5,12 @@
 use http::StatusCode;
 
 /// Problem Details
-pub trait ProblemDetails: serde::Serialize {
+pub trait ProblemDetails: ProblemDetailsReadOnly + ProblemDetailsMut + serde::Serialize {}
+
+impl ProblemDetails for Error {}
+
+/// Getters for Problem Details
+pub trait ProblemDetailsReadOnly {
     /// Return a URI reference RFC3986 that identifies the
     /// problem type.  This specification encourages that, when
     /// dereferenced, it provide human-readable documentation for the
@@ -22,18 +27,11 @@ pub trait ProblemDetails: serde::Serialize {
     /// occurrence of the problem.
     fn status_code(&self) -> StatusCode;
 
-    /// Set a kind and a title.
-    fn set_kind(&mut self, kind: &str, title: &str) -> &mut Self;
-
-    /// Set a status code.
-    fn set_status_code(&mut self, value: StatusCode) -> &mut Self;
+    /// Return a human-readable explanation specific to this occurrence of the problem.
+    fn detail(&self) -> Option<&str>;
 }
 
-impl ProblemDetails for Error {
-    fn set_kind(&mut self, kind: &str, title: &str) -> &mut Self {
-        self.set_kind(kind, title)
-    }
-
+impl ProblemDetailsReadOnly for Error {
     fn status_code(&self) -> StatusCode {
         self.status_code()
     }
@@ -46,11 +44,40 @@ impl ProblemDetails for Error {
         self.title()
     }
 
+    fn detail(&self) -> Option<&str> {
+        self.detail()
+    }
+}
+
+/// Mutation methods for Problem Details.
+/// This methods are in separate trait to make ProblemDetailsReadOnly object safe.
+pub trait ProblemDetailsMut {
+    /// Set a kind and a title.
+    fn set_kind(&mut self, kind: &str, title: &str) -> &mut Self;
+
+    /// Set a status code.
+    fn set_status_code(&mut self, value: StatusCode) -> &mut Self;
+
+    /// Set a detail.
+    fn set_detail(&mut self, detail: &str) -> &mut Self;
+}
+
+impl ProblemDetailsMut for Error {
+    fn set_kind(&mut self, kind: &str, title: &str) -> &mut Self {
+        self.set_kind(kind, title)
+    }
+
     fn set_status_code(&mut self, value: StatusCode) -> &mut Self {
         self.set_status_code(value)
+    }
+
+    fn set_detail(&mut self, detail: &str) -> &mut Self {
+        self.set_detail(detail)
     }
 }
 
 pub use self::error::{Builder, Error};
 mod error;
-mod extension;
+
+/// Extensions
+pub mod extension;
