@@ -13,6 +13,7 @@ impl From<Error> for TheError {
         match value.kind() {
             Kind::Forbidden(ref inner) => fun(StatusCode::FORBIDDEN, inner),
             Kind::Network(ref inner) => fun(StatusCode::FAILED_DEPENDENCY, inner),
+            Kind::Internal(ref inner) => fun(StatusCode::UNPROCESSABLE_ENTITY, inner),
         }
     }
 }
