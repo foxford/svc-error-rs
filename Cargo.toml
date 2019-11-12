@@ -18,7 +18,7 @@ diesel = { version = ">=1.4", optional = true }
 r2d2 = { version = ">=0.8", optional = true }
 svc-agent = { version = ">=0.5", optional = true }
 svc-authn = { version = ">=0.4", optional = true }
-svc-authz = { version = ">=0.8", optional = true }
+svc-authz = { version = ">=0.9", optional = true }
 sentry = { version = ">=0.16", optional = true }
 atom = { version = "0.3", optional = true }
 lazy_static = { version = "1.4", optional = true }
@@ -26,6 +26,3 @@ lazy_static = { version = "1.4", optional = true }
 [features]
 default = []
 sentry-extension = ["sentry", "atom", "lazy_static"]
-
-[patch.crates-io]
-svc-authz = { git = "https://github.com/netology-group/svc-authz-rs", branch = "feature/ULMS-725" }
