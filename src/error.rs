@@ -139,11 +139,6 @@ impl fmt::Display for Error {
             write!(fmt, ": {}", detail)?;
         }
 
-        let inner_detail = self.to_string();
-        if let false = inner_detail.is_empty() {
-            write!(fmt, ": {}", inner_detail)?;
-        }
-
         Ok(())
     }
 }
