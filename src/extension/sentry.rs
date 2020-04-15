@@ -76,6 +76,10 @@ impl Into<Event<'static>> for BoxedProblemDetails {
     fn into(self) -> Event<'static> {
         let mut extra = BTreeMap::new();
 
+        for (extra_key, value) in self.extras() {
+            extra.insert(extra_key.to_owned(), Value::from(value.to_owned()));
+        }
+
         extra.insert(String::from("type"), Value::from(self.kind()));
         extra.insert(String::from("title"), Value::from(self.title()));
 
