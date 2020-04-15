@@ -1,6 +1,6 @@
 use http::StatusCode;
 use serde_derive::Serialize;
-use std::{error, fmt};
+use std::{collections::HashMap, error, fmt};
 
 /// Configure and build an error.
 #[derive(Debug)]
@@ -20,6 +20,8 @@ pub struct Error {
     detail: Option<String>,
     #[serde(skip)]
     status: StatusCode,
+    #[serde(skip)]
+    extras: HashMap<String, String>,
 }
 
 impl Builder {
@@ -80,6 +82,7 @@ impl Error {
             kind: kind.to_owned(),
             title: title.to_owned(),
             detail: None,
+            extras: HashMap::new(),
             status,
         }
     }
@@ -123,6 +126,17 @@ impl Error {
         self
     }
 
+    /// Return all extras for this error.
+    pub fn extras(&self) -> &HashMap<String, String> {
+        &self.extras
+    }
+
+    /// Set detailed information about the error.
+    pub fn set_extra(&mut self, key: &str, value: &str) -> &mut Self {
+        self.extras.insert(key.to_owned(), value.to_owned());
+        self
+    }
+
     /// Create an error builder object.
     pub fn builder() -> Builder {
         Builder::new()
@@ -150,6 +164,7 @@ impl From<StatusCode> for Error {
             kind: String::from("about:blank"),
             title: title.to_owned(),
             detail: None,
+            extras: HashMap::new(),
             status,
         }
     }

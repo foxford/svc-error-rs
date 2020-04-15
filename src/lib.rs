@@ -1,11 +1,16 @@
 #![deny(missing_debug_implementations, missing_docs)]
 
 //! SvcError is an implementation of RFC7807: Problem Details for HTTP APIs.
+//!
+//! It's possible to attach some metadata to the error (only `payload` now).
 
 use http::StatusCode;
+use std::collections::HashMap;
 
 /// Problem Details
 pub trait ProblemDetails: ProblemDetailsReadOnly + ProblemDetailsMut + serde::Serialize {}
+
+/// Getters for Problem Details and accompanying metadata
 
 impl ProblemDetails for Error {}
 
@@ -29,6 +34,9 @@ pub trait ProblemDetailsReadOnly {
 
     /// Return a human-readable explanation specific to this occurrence of the problem.
     fn detail(&self) -> Option<&str>;
+
+    /// Return all error related extra values.
+    fn extras(&self) -> &HashMap<String, String>;
 }
 
 impl ProblemDetailsReadOnly for Error {
@@ -46,6 +54,10 @@ impl ProblemDetailsReadOnly for Error {
 
     fn detail(&self) -> Option<&str> {
         self.detail()
+    }
+
+    fn extras(&self) -> &HashMap<String, String> {
+        self.extras()
     }
 }
 
