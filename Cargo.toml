@@ -22,6 +22,7 @@ svc-authz = { version = ">=0.9", optional = true }
 sentry = { version = ">=0.16", optional = true }
 atom = { version = "0.3", optional = true }
 lazy_static = { version = "1.4", optional = true }
+crossbeam-channel = "0.4"
 
 [features]
 default = []

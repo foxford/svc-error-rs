@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::sync::{mpsc, Arc, RwLock};
+use std::sync::{Arc, RwLock};
 use std::thread;
 
 use atom::AtomSetOnce;
@@ -12,7 +12,7 @@ use crate::ProblemDetailsReadOnly;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type BoxedProblemDetails = Box<dyn ProblemDetailsReadOnly + Send>;
-type Sender = mpsc::Sender<BoxedProblemDetails>;
+type Sender = crossbeam_channel::Sender<BoxedProblemDetails>;
 
 lazy_static! {
     static ref SENTRY_TX: AtomSetOnce<Arc<RwLock<Sender>>> = AtomSetOnce::empty();
@@ -32,7 +32,7 @@ pub struct Config {
 /// Spawns a thread that sends errors to Sentry.
 pub fn init(config: &Config) {
     let config = config.to_owned();
-    let (tx, rx) = mpsc::channel::<BoxedProblemDetails>();
+    let (tx, rx) = crossbeam_channel::unbounded::<BoxedProblemDetails>();
     SENTRY_TX.set_if_none(Arc::new(RwLock::new(tx)));
 
     thread::spawn(move || {
