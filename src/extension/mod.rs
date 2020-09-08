@@ -1,6 +1,9 @@
 #[cfg(feature = "diesel")]
 mod diesel;
 
+#[cfg(feature = "sqlx")]
+mod sqlx;
+
 #[cfg(feature = "r2d2")]
 mod r2d2;
 
