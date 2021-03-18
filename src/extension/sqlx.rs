@@ -1,5 +1,5 @@
-use sqlx::Error;
 use http::StatusCode;
+use sqlx::Error;
 
 use crate::Error as TheError;
 

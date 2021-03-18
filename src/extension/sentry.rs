@@ -37,7 +37,6 @@ pub fn init(config: &Config) {
 
     thread::spawn(move || {
         let _guard = sentry::init(config.dsn);
-        sentry::integrations::panic::register_panic_handler();
 
         for err in rx {
             let mut event: Event = err.into();
@@ -90,6 +89,7 @@ impl Into<Event<'static>> for BoxedProblemDetails {
 
         Event {
             message: self.detail().map(|s| s.to_owned()),
+            fingerprint: vec![self.kind().to_owned().into()].into(),
             level: Level::Error,
             extra,
             ..Default::default()
