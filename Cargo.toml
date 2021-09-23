@@ -11,20 +11,19 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-http = "0.1"
+http = "0.2"
 serde = { version = "1.0" }
 serde_derive = { version = "1.0" }
 diesel = { version = ">=1.4", optional = true }
-sqlx = { version = "0.4.0-beta.1", optional = true }
+sqlx = { version = "0.5", optional = true, features = [ "runtime-tokio-native-tls" ] }
 r2d2 = { version = ">=0.8", optional = true }
 svc-agent = { version = ">=0.5", optional = true }
 svc-authn = { version = ">=0.4", optional = true }
 svc-authz = { version = ">=0.9", optional = true }
 sentry = { version = ">=0.22", optional = true, default-features = false }
-atom = { version = "0.3", optional = true }
-lazy_static = { version = "1.4", optional = true }
-crossbeam-channel = "0.4"
+once_cell = { version = "1", optional = true }
+crossbeam-channel = "0.5"
 
 [features]
 default = []
-sentry-extension = ["sentry", "atom", "lazy_static"]
+sentry-extension = ["sentry", "once_cell"]
