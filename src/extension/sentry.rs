@@ -3,20 +3,17 @@ use std::collections::BTreeMap;
 use std::sync::{Arc, RwLock};
 use std::thread;
 
-use atom::AtomSetOnce;
-use lazy_static::lazy_static;
 use sentry::protocol::{value::Value, Event, Level};
 use serde_derive::Deserialize;
 
 use crate::ProblemDetailsReadOnly;
+use once_cell::sync::OnceCell;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type BoxedProblemDetails = Box<dyn ProblemDetailsReadOnly + Send>;
 type Sender = crossbeam_channel::Sender<BoxedProblemDetails>;
 
-lazy_static! {
-    static ref SENTRY_TX: AtomSetOnce<Arc<RwLock<Sender>>> = AtomSetOnce::empty();
-}
+static SENTRY_TX: OnceCell<Arc<RwLock<Sender>>> = OnceCell::new();
 
 /// Sentry configuration.
 #[derive(Clone, Debug, Deserialize)]
@@ -33,7 +30,7 @@ pub struct Config {
 pub fn init(config: &Config) {
     let config = config.to_owned();
     let (tx, rx) = crossbeam_channel::unbounded::<BoxedProblemDetails>();
-    SENTRY_TX.set_if_none(Arc::new(RwLock::new(tx)));
+    SENTRY_TX.get_or_init(|| Arc::new(RwLock::new(tx)));
 
     thread::spawn(move || {
         let _guard = sentry::init(config.dsn);
