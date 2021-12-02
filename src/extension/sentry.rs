@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use std::sync::{Arc, RwLock};
 use std::thread;
 
 use sentry::protocol::{value::Value, Event, Level};
@@ -11,9 +10,9 @@ use once_cell::sync::OnceCell;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type BoxedProblemDetails = Box<dyn ProblemDetailsReadOnly + Send>;
-type Sender = crossbeam_channel::Sender<BoxedProblemDetails>;
+type Sender = crossbeam_channel::Sender<Cmd>;
 
-static SENTRY_TX: OnceCell<Arc<RwLock<Sender>>> = OnceCell::new();
+static SENTRY_TX: OnceCell<Sender> = OnceCell::new();
 
 /// Sentry configuration.
 #[derive(Clone, Debug, Deserialize)]
@@ -26,29 +25,57 @@ pub struct Config {
     pub server_name: Option<String>,
 }
 
+enum Cmd {
+    Terminate,
+    NewError(BoxedProblemDetails),
+}
+
 /// Spawns a thread that sends errors to Sentry.
-pub fn init(config: &Config) {
+/// The thread will be spawned only on first invocation, any other calls to init will return None.
+/// Returned JoinHandle should be joined on shutdown so remaining events wont be lost.
+pub fn init(config: &Config) -> Option<thread::JoinHandle<()>> {
     let config = config.to_owned();
-    let (tx, rx) = crossbeam_channel::unbounded::<BoxedProblemDetails>();
-    SENTRY_TX.get_or_init(|| Arc::new(RwLock::new(tx)));
+    let (tx, rx) = crossbeam_channel::unbounded::<Cmd>();
+    match SENTRY_TX.try_insert(tx) {
+        Err(_) => None,
+        Ok(_) => {
+            let handle = thread::spawn(move || {
+                let options = options(&config);
+                let _guard = sentry::init((config.dsn, options));
 
-    thread::spawn(move || {
-        let _guard = sentry::init(config.dsn);
+                sentry::configure_scope(|scope| {
+                    if let Ok(kns) = std::env::var("KUBE_NAMESPACE") {
+                        scope.set_tag("kube_namespace", kns);
+                    }
+                });
 
-        for err in rx {
-            let mut event: Event = err.into();
-
-            if let Some(environment) = config.environment.clone() {
-                event.environment = Some(Cow::from(environment));
-            }
-
-            if let Some(server_name) = config.server_name.clone() {
-                event.server_name = Some(Cow::from(server_name));
-            }
-
-            sentry::capture_event(event);
+                for message in rx {
+                    match message {
+                        Cmd::Terminate => return,
+                        Cmd::NewError(err) => {
+                            let event: Event = err.into();
+                            sentry::capture_event(event);
+                        }
+                    }
+                }
+            });
+            Some(handle)
         }
-    });
+    }
+}
+
+fn options(config: &Config) -> sentry::ClientOptions {
+    let mut options: sentry::ClientOptions = Default::default();
+
+    if let Some(environment) = config.environment.clone() {
+        options.environment = Some(Cow::from(environment));
+    }
+
+    if let Some(server_name) = config.server_name.clone() {
+        options.server_name = Some(Cow::from(server_name));
+    }
+
+    options
 }
 
 /// Send error to Sentry
@@ -58,13 +85,19 @@ where
 {
     match SENTRY_TX.get() {
         None => Ok(()),
-        Some(tx_lock) => tx_lock
-            .read()
-            .map_err(|err| format!("Failed to acquire Sentry tx lock: {}", err).into())
-            .and_then(|tx| {
-                tx.send(Box::new(err))
-                    .map_err(|err| format!("Failed to send error to Sentry: {}", err).into())
-            }),
+        Some(tx) => tx
+            .send(Cmd::NewError(Box::new(err)))
+            .map_err(|err| format!("Failed to send error to Sentry: {}", err).into()),
+    }
+}
+
+/// Terminate Sentry thread
+pub fn terminate() -> Result<(), Error> {
+    match SENTRY_TX.get() {
+        None => Ok(()),
+        Some(tx) => tx
+            .send(Cmd::Terminate)
+            .map_err(|err| format!("Failed to send shutdown signal to Sentry: {}", err).into()),
     }
 }
 
