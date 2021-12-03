@@ -1,15 +1,12 @@
 use std::borrow::Cow;
-use std::collections::BTreeMap;
+use std::sync::Arc;
 use std::thread;
 
-use sentry::protocol::{value::Value, Event, Level};
 use serde_derive::Deserialize;
 
-use crate::ProblemDetailsReadOnly;
 use once_cell::sync::OnceCell;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type BoxedProblemDetails = Box<dyn ProblemDetailsReadOnly + Send>;
 type Sender = crossbeam_channel::Sender<Cmd>;
 
 static SENTRY_TX: OnceCell<Sender> = OnceCell::new();
@@ -23,11 +20,13 @@ pub struct Config {
     pub environment: Option<String>,
     /// Some string to identify the instance of your service.
     pub server_name: Option<String>,
+    /// The release to be sent with events.
+    pub release: Option<Cow<'static, str>>,
 }
 
 enum Cmd {
     Terminate,
-    NewError(BoxedProblemDetails),
+    AnyhowError(Arc<anyhow::Error>),
 }
 
 /// Spawns a thread that sends errors to Sentry.
@@ -39,6 +38,9 @@ pub fn init(config: &Config) -> Option<thread::JoinHandle<()>> {
     match SENTRY_TX.try_insert(tx) {
         Err(_) => None,
         Ok(_) => {
+            std::env::set_var("RUST_BACKTRACE", "1");
+            std::env::set_var("RUST_LIB_BACKTRACE", "1");
+
             let handle = thread::spawn(move || {
                 let options = options(&config);
                 let _guard = sentry::init((config.dsn, options));
@@ -52,9 +54,8 @@ pub fn init(config: &Config) -> Option<thread::JoinHandle<()>> {
                 for message in rx {
                     match message {
                         Cmd::Terminate => return,
-                        Cmd::NewError(err) => {
-                            let event: Event = err.into();
-                            sentry::capture_event(event);
+                        Cmd::AnyhowError(err) => {
+                            sentry::integrations::anyhow::capture_anyhow(&err);
                         }
                     }
                 }
@@ -65,7 +66,11 @@ pub fn init(config: &Config) -> Option<thread::JoinHandle<()>> {
 }
 
 fn options(config: &Config) -> sentry::ClientOptions {
-    let mut options: sentry::ClientOptions = Default::default();
+    let mut options: sentry::ClientOptions = sentry::ClientOptions {
+        attach_stacktrace: true,
+        release: config.release.clone(),
+        ..Default::default()
+    };
 
     if let Some(environment) = config.environment.clone() {
         options.environment = Some(Cow::from(environment));
@@ -79,14 +84,11 @@ fn options(config: &Config) -> sentry::ClientOptions {
 }
 
 /// Send error to Sentry
-pub fn send<E>(err: E) -> Result<(), Error>
-where
-    E: ProblemDetailsReadOnly + Send + 'static,
-{
+pub fn send(err: Arc<anyhow::Error>) -> Result<(), Error> {
     match SENTRY_TX.get() {
         None => Ok(()),
         Some(tx) => tx
-            .send(Cmd::NewError(Box::new(err)))
+            .send(Cmd::AnyhowError(err))
             .map_err(|err| format!("Failed to send error to Sentry: {}", err).into()),
     }
 }
@@ -98,31 +100,5 @@ pub fn terminate() -> Result<(), Error> {
         Some(tx) => tx
             .send(Cmd::Terminate)
             .map_err(|err| format!("Failed to send shutdown signal to Sentry: {}", err).into()),
-    }
-}
-
-impl Into<Event<'static>> for BoxedProblemDetails {
-    fn into(self) -> Event<'static> {
-        let mut extra = BTreeMap::new();
-
-        for (extra_key, value) in self.extras() {
-            extra.insert(extra_key.to_owned(), Value::from(value.to_owned()));
-        }
-
-        extra.insert(String::from("type"), Value::from(self.kind()));
-        extra.insert(String::from("title"), Value::from(self.title()));
-
-        extra.insert(
-            String::from("status_code"),
-            Value::from(self.status_code().as_str()),
-        );
-
-        Event {
-            message: self.detail().map(|s| s.to_owned()),
-            fingerprint: vec![self.kind().to_owned().into()].into(),
-            level: Level::Error,
-            extra,
-            ..Default::default()
-        }
     }
 }
