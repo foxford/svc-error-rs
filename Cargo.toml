@@ -1,6 +1,6 @@
 [package]
 name = "svc-error"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Andrei Nesterov <ae.nesterov@gmail.com>"]
 description = "An implementation of RFC7807: Problem Details for HTTP APIs."
 readme = "README.md"
@@ -15,6 +15,7 @@ anyhow = "1"
 crossbeam-channel = "0.5"
 diesel = { version = "1.4.8", optional = true }
 http = "0.2"
+http-serde = { version = "1.1", optional = true }
 once_cell = { version = "1", optional = true }
 r2d2 = { version = ">=0.8", optional = true }
 sentry = { version = "0.23", optional = true, default-features = false, features = ["anyhow", "backtrace"] }
@@ -29,3 +30,4 @@ svc-authz = { version = ">=0.9", optional = true }
 [features]
 default = []
 sentry-extension = ["sentry", "sentry-anyhow", "once_cell"]
+serialize-status-code = ["http-serde"]

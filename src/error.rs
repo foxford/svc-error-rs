@@ -18,7 +18,11 @@ pub struct Error {
     title: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     detail: Option<String>,
+    #[cfg(not(feature = "serialize-status-code"))]
     #[serde(skip)]
+    status: StatusCode,
+    #[cfg(feature = "serialize-status-code")]
+    #[serde(with = "http_serde::status_code")]
     status: StatusCode,
     #[serde(skip)]
     extras: HashMap<String, String>,
