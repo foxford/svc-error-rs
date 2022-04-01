@@ -121,7 +121,7 @@ impl Error {
 
     /// Return a detail for this error.
     pub fn detail(&self) -> Option<&str> {
-        self.detail.as_ref().map(|s| s.as_str())
+        self.detail.as_deref()
     }
 
     /// Set detailed information about the error.
