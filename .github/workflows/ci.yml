@@ -11,14 +11,14 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.3.0
       - uses: actions-rs/toolchain@v1.0.7
         with:
           profile: minimal
           toolchain: stable
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2.2.0
-      - run: cargo check
+      - run: cargo check --all-features
       - run: cargo fmt --all --check
       - run: cargo clippy --all-features -- -D warnings
       - run: cargo build --release --all-features
