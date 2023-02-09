@@ -154,7 +154,7 @@ impl fmt::Display for Error {
         write!(fmt, "[{}] {}", self.kind, self.title)?;
 
         if let Some(ref detail) = self.detail {
-            write!(fmt, ": {}", detail)?;
+            write!(fmt, ": {detail}")?;
         }
 
         Ok(())

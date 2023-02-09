@@ -1,6 +1,6 @@
 [package]
 name = "svc-error"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Andrei Nesterov <ae.nesterov@gmail.com>"]
 description = "An implementation of RFC7807: Problem Details for HTTP APIs."
 readme = "README.md"
@@ -18,8 +18,8 @@ http = "0.2"
 http-serde = { version = "1.1", optional = true }
 once_cell = { version = "1", optional = true }
 r2d2 = { version = ">=0.8", optional = true }
-sentry = { version = "0.27", optional = true, default-features = false, features = ["anyhow", "backtrace"] }
-sentry-anyhow = { version = "0.27", optional = true, features = ["backtrace"] }
+sentry = { version = "0.29", optional = true, default-features = false, features = ["anyhow", "backtrace", "reqwest"] }
+sentry-anyhow = { version = "0.29", optional = true, features = ["backtrace"] }
 serde = { version = "1.0" }
 serde_derive = { version = "1.0" }
 sqlx = { version = "0.6", optional = true, features = [ "runtime-tokio-native-tls" ] }

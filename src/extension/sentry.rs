@@ -89,7 +89,7 @@ pub fn send(err: Arc<anyhow::Error>) -> Result<(), Error> {
         None => Ok(()),
         Some(tx) => tx
             .send(Cmd::AnyhowError(err))
-            .map_err(|err| format!("Failed to send error to Sentry: {}", err).into()),
+            .map_err(|err| format!("Failed to send error to Sentry: {err}").into()),
     }
 }
 
@@ -99,6 +99,6 @@ pub fn terminate() -> Result<(), Error> {
         None => Ok(()),
         Some(tx) => tx
             .send(Cmd::Terminate)
-            .map_err(|err| format!("Failed to send shutdown signal to Sentry: {}", err).into()),
+            .map_err(|err| format!("Failed to send shutdown signal to Sentry: {err}").into()),
     }
 }
