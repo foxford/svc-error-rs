@@ -23,9 +23,9 @@ sentry-anyhow = { version = "0.31", optional = true, features = ["backtrace"] }
 serde = { version = "1.0" }
 serde_derive = { version = "1.0" }
 sqlx = { version = "0.6", optional = true, features = [ "runtime-tokio-native-tls" ] }
-svc-agent = { path = "../svc-agent-rs", optional = true }
-svc-authn = { path = "../svc-authn-rs", optional = true }
-svc-authz = { path = "../svc-authz-rs", optional = true }
+svc-agent = { git = "https://github.com/foxford/svc-agent-rs", branch = "ULMS-2377", optional = true }
+svc-authn = { git = "https://github.com/foxford/svc-authn-rs", branch = "ULMS-2377", optional = true }
+svc-authz = { git = "https://github.com/foxford/svc-authz-rs", branch = "ULMS-2377", optional = true }
 
 [features]
 default = []
