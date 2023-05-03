@@ -20,7 +20,7 @@ once_cell = { version = "1", optional = true }
 r2d2 = { version = ">=0.8", optional = true }
 sentry = { version = "0.31", optional = true, default-features = false, features = ["anyhow", "backtrace", "reqwest"] }
 sentry-anyhow = { version = "0.31", optional = true, features = ["backtrace"] }
-serde = { version = "1.0" }
+serde = { version = "1.0", features = ["derive"] }
 serde_derive = { version = "1.0" }
 sqlx = { version = "0.6", optional = true, features = [ "runtime-tokio-native-tls" ] }
 svc-agent = { version = "0.20", optional = true }
