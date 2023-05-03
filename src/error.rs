@@ -1,5 +1,5 @@
 use http::StatusCode;
-use serde_derive::Serialize;
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error, fmt};
 
 /// Configure and build an error.
@@ -11,7 +11,7 @@ pub struct Builder {
 }
 
 /// Error object.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Error {
     #[serde(rename = "type")]
     kind: String,
