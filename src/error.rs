@@ -81,10 +81,10 @@ impl Builder {
 
 impl Error {
     /// Create an error object.
-    pub fn new(kind: &str, title: &str, status: StatusCode) -> Self {
+    pub fn new<S: Into<String>>(kind: S, title: S, status: StatusCode) -> Self {
         Self {
-            kind: kind.to_owned(),
-            title: title.to_owned(),
+            kind: kind.into(),
+            title: title.into(),
             detail: None,
             extras: HashMap::new(),
             status,
@@ -92,9 +92,9 @@ impl Error {
     }
 
     /// Set kind and title of the error.
-    pub fn set_kind(&mut self, kind: &str, title: &str) -> &mut Self {
-        self.kind = kind.to_owned();
-        self.title = title.to_owned();
+    pub fn set_kind<S: Into<String>>(&mut self, kind: S, title: S) -> &mut Self {
+        self.kind = kind.into();
+        self.title = title.into();
         self
     }
 
@@ -125,8 +125,8 @@ impl Error {
     }
 
     /// Set detailed information about the error.
-    pub fn set_detail(&mut self, value: &str) -> &mut Self {
-        self.detail = Some(value.to_owned());
+    pub fn set_detail<S: Into<String>>(&mut self, value: S) -> &mut Self {
+        self.detail = Some(value.into());
         self
     }
 
@@ -136,8 +136,8 @@ impl Error {
     }
 
     /// Set detailed information about the error.
-    pub fn set_extra(&mut self, key: &str, value: &str) -> &mut Self {
-        self.extras.insert(key.to_owned(), value.to_owned());
+    pub fn set_extra<S: Into<String>>(&mut self, key: S, value: S) -> &mut Self {
+        self.extras.insert(key.into(), value.into());
         self
     }
 
