@@ -1,6 +1,3 @@
-#[cfg(feature = "diesel")]
-mod diesel;
-
 #[cfg(feature = "sqlx")]
 mod sqlx;
 
