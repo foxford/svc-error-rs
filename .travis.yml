@@ -24,9 +24,6 @@ jobs:
       name: Build w/o features
       script: cargo build
     - stage: build
-      name: Build w/ diesel
-      script: cargo build --features "diesel"
-    - stage: build
       name: Build w/ r2d2
       script: cargo build --features "r2d2"
     - stage: build
