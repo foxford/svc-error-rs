@@ -11,7 +11,7 @@ pub struct Builder {
 }
 
 /// Error object.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Error {
     #[serde(rename = "type")]
     kind: String,
