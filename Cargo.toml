@@ -21,7 +21,7 @@ sentry = { version = "0.31", optional = true, default-features = false, features
 sentry-anyhow = { version = "0.31", optional = true, features = ["backtrace"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = { version = "1.0" }
-sqlx = { version = "0.6", optional = true, features = [ "runtime-tokio-native-tls" ] }
+sqlx = { version = "0.7", optional = true, features = [ "runtime-tokio-native-tls" ] }
 svc-agent = { version = "0.21", optional = true }
 svc-authn = { version = "0.8", optional = true }
 svc-authz = { version = "0.12", optional = true }
